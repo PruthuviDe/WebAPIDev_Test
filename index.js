@@ -57,9 +57,15 @@ app.get('/vehicles', (req, res) => {
 });
 
 app.get('/vehicles/:vehicleId', (req, res) => {
-  const record = db.vehicles.find(v => v.id === Number(req.params.vehicleId));
+  const vehicleId = Number(req.params.vehicleId);
+  const record = db.vehicles.find(v => v.id === vehicleId);
   if (!record) return res.status(404).json({ error: 'Vehicle not found' });
-  res.json(fmtVehicle(record));
+
+  const lastPing = db.pings
+    .filter(p => p.vehicle_id === vehicleId)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] ?? null;
+
+  res.json({ ...fmtVehicle(record), last_ping: lastPing ? fmtPing(lastPing) : null });
 });
 
 app.get('/vehicles/:vehicleId/pings', (req, res) => {
