@@ -13,6 +13,13 @@ const fmtStation  = s  => ({ station_id: s.id, name: s.name, district_id: s.dist
 const fmtVehicle  = v  => ({ vehicle_id: v.id, reg_number: v.registration_number, device_id: v.device_id, station_id: v.station_id });
 const fmtPing     = p  => ({ ping_id: p.id, vehicle_id: p.vehicle_id, timestamp: p.timestamp, lat: p.latitude, lng: p.longitude, speed: p.speed ?? null });
 
+// ── Query helpers ─────────────────────────────────────────────────────────────
+// Returns the single most-recent ping for a vehicle, or null if none exist.
+const getLatestPing = (vehicleId) =>
+  db.pings
+    .filter(p => p.vehicle_id === vehicleId)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] ?? null;
+
 // ── Root ────────────────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
   res.json({ status: 'ok', session: 'NB6007CEM S2' });
@@ -61,10 +68,7 @@ app.get('/vehicles/:vehicleId', (req, res) => {
   const record = db.vehicles.find(v => v.id === vehicleId);
   if (!record) return res.status(404).json({ error: 'Vehicle not found' });
 
-  const lastPing = db.pings
-    .filter(p => p.vehicle_id === vehicleId)
-    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0] ?? null;
-
+  const lastPing = getLatestPing(vehicleId);
   res.json({ ...fmtVehicle(record), last_ping: lastPing ? fmtPing(lastPing) : null });
 });
 
@@ -73,6 +77,23 @@ app.get('/vehicles/:vehicleId/pings', (req, res) => {
   const vehicle = db.vehicles.find(v => v.id === vehicleId);
   if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
   res.json(db.pings.filter(p => p.vehicle_id === vehicleId).map(fmtPing));
+});
+
+app.get('/vehicles/:vehicleId/last-position', (req, res) => {
+  const vehicleId = Number(req.params.vehicleId);
+  const vehicle = db.vehicles.find(v => v.id === vehicleId);
+  if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
+
+  const latest = getLatestPing(vehicleId);
+  if (!latest) return res.status(404).json({ error: 'No pings found for this vehicle' });
+
+  res.json({
+    vehicle_id: latest.vehicle_id,
+    timestamp:  latest.timestamp,
+    lat:        latest.latitude,
+    lng:        latest.longitude,
+    speed:      latest.speed ?? null
+  });
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
