@@ -1,95 +1,101 @@
-# Sri Lanka Police Vehicle Tracking API 🚓📍
+# Sri Lanka Police Vehicle Tracking API
 
-This is my REST API project built using **Node.js** and **Express**. It was created as part of the coursework for the **NB6007CEM** module.
+This is a RESTful API built with Node.js and Express, designed for tracking police vehicle positions in Sri Lanka. The project is developed as part of the coursework requirements for the NB6007CEM Web API Development module.
 
 *   **Student Index:** COBSCCOMP251P-016
-*   **Deployment platform:** Render (hosted at [https://webapidev-test-8luf.onrender.com](https://webapidev-test-8luf.onrender.com))
+*   **Target Platform:** Render
+*   **Production URL:** https://webapidev-test-8luf.onrender.com
 
 ---
 
-## 📖 Project Overview
-
-The project acts as a backend tracking system for Sri Lankan police vehicles. It serves geographic data (Provinces, Districts, Police Stations) and real-time/historical vehicle location pings. 
-
-To keep things lightweight for the submission, **there is no database**. Instead, the application loads a pre-populated static dataset (`seed.json`) directly into memory once at startup. Any new location pings submitted by devices are saved in-memory (they reset when the server restarts).
-
----
-
-## 🛠️ Tech Stack
-
-*   **Runtime:** Node.js
-*   **Framework:** Express.js
-*   **Database:** None (In-memory array via `seed.json`)
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [API Architecture & Standards](#api-architecture--standards)
+3. [Prerequisites & Installation](#prerequisites--installation)
+4. [API Endpoints Reference](#api-endpoints-reference)
+5. [Testing Ingestion (POST)](#testing-ingestion-post)
 
 ---
 
-## 📏 WSO2 REST API Guidelines Applied
+## 1. Project Overview
 
-I carefully followed the WSO2 REST API design specifications:
-1.  **Strictly Lowercase & Hyphenated Paths:** We use `/last-position` instead of `/lastPosition` or `/getLastPosition`.
-2.  **No Verbs in URIs:** All paths represent resources (nouns). We use HTTP methods (`GET`, `POST`) to define the action.
-3.  **Flat JSON Structure:** No redundant envelope wrappers. Collection routes return a flat JSON array `[...]` and resource routes return a flat JSON object `{...}`.
-4.  **Field Naming:** All field names in responses are strictly `snake_case` (e.g. `vehicle_id`, `reg_number`, `station_id`).
+This backend application tracks and manages geographical nodes (Provinces, Districts, Police Stations) and real-time GPS location telemetry from police vehicles. 
+
+To satisfy coursework constraints while keeping the system lightweight, the project utilizes an in-memory data store. A pre-populated dataset (`seed.json`) is loaded into memory once at server startup. New GPS pings submitted to the API are added to the in-memory array and persist until the server process is restarted.
 
 ---
 
-## 🗺️ API Routes
+## 2. API Architecture & Standards
+
+The API strictly adheres to the WSO2 REST API Design Guidelines:
+
+*   **Uniform Resource Identifiers (URIs):** All path segments are lowercase and hyphen-separated (kebab-case). For example, `/last-position` is used instead of camelCase or snake_case.
+*   **Resource Orientation:** URIs represent nouns (collections or individual resources) rather than actions or verbs. Operations are defined by the standard HTTP methods (`GET`, `POST`).
+*   **Standardized Payload Shapes:** Envelope wrappers (e.g., nesting arrays inside a `data` key) are avoided. Collections return flat JSON arrays; atomic members return flat JSON objects.
+*   **Naming Conventions:** Response body fields are represented consistently in `snake_case` (e.g., `vehicle_id`, `reg_number`, `station_id`).
+*   **Consistent Response Headers:** Successful resource creation returns the standard `Location`, `ETag`, and `Last-Modified` headers.
+
+---
+
+## 3. Prerequisites & Installation
+
+### Prerequisites
+*   Node.js (version 18 or higher recommended)
+*   npm (Node Package Manager)
+
+### Installation
+1. Clone the repository to your local machine:
+   ```bash
+   git clone https://github.com/PruthuviDe/WebAPIDev_Test.git
+   cd WebAPIDev_Test
+   ```
+2. Install the necessary dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running Locally
+To launch the server on your local environment:
+```bash
+npm start
+```
+By default, the server listens on port `3000` (`http://localhost:3000`).
+
+---
+
+## 4. API Endpoints Reference
 
 ### Geographics (Read-Only)
-*   `GET /provinces` — Get all 9 provinces.
-*   `GET /provinces/:provinceId` — Get a specific province by ID.
-*   `GET /districts` — Get all 25 districts (includes `province_id`).
-*   `GET /districts/:districtId` — Get a specific district.
-*   `GET /stations` — Get all police stations (includes `district_id`).
-*   `GET /stations/:stationId` — Get a specific police station.
+*   `GET /provinces` - Retrieves all provinces.
+*   `GET /provinces/:provinceId` - Retrieves a specific province by ID.
+*   `GET /districts` - Retrieves all districts including their parent province IDs.
+*   `GET /districts/:districtId` - Retrieves a specific district.
+*   `GET /stations` - Retrieves all police stations (depots) with district relationships.
+*   `GET /stations/:stationId` - Retrieves a specific station.
 
 ### Vehicles & Position (Read-Only)
-*   `GET /vehicles` — Get all vehicles.
-*   `GET /vehicles/:vehicleId` — **Composite view**: Returns vehicle metadata along with a nested `last_ping` object (the most recent GPS ping sorted descending by timestamp).
-*   `GET /vehicles/:vehicleId/last-position` — Returns **only** the latest location details (coordinates, speed, and timestamp) without vehicle metadata.
-*   `GET /vehicles/:vehicleId/pings` — Get all historical pings for a specific vehicle.
-*   `GET /vehicles/:vehicleId/pings/:pingId` — Get a single location ping by its unique ID.
+*   `GET /vehicles` - Retrieves a list of all tracked vehicles.
+*   `GET /vehicles/:vehicleId` - Composite representation returning vehicle metadata and the single most recent location ping (sorted descending by timestamp).
+*   `GET /vehicles/:vehicleId/last-position` - Specialized endpoint returning only the most recent coordinates, timestamp, and speed for a vehicle (excludes vehicle metadata).
+*   `GET /vehicles/:vehicleId/pings` - Retrieves all location pings for a specific vehicle.
+*   `GET /vehicles/:vehicleId/pings/:pingId` - Retrieves details of a specific location ping.
 
 ### Ingestion (Write)
-*   `POST /vehicles/:vehicleId/pings` — Allows GPS tracking devices to send real-time pings.
-    *   **Authentication:** Requires an `X-API-Key` header matching the device's designated key (formatted as `key_v` + 3-digit padded vehicle ID, e.g. `key_v001` for vehicle 1).
-    *   **Headers Returned (201 Created):** 
-        *   `Location`: path to retrieve the new ping.
-        *   `ETag`: quoted ping ID.
-        *   `Last-Modified`: UTC timestamp of when it was saved.
+*   `POST /vehicles/:vehicleId/pings` - Submits a new location ping for a vehicle.
 
 ---
 
-## 🚀 How to Run Locally
+## 5. Testing Ingestion (POST)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/PruthuviDe/WebAPIDev_Test.git
-    cd WebAPIDev_Test
-    ```
+The ingestion endpoint requires custom header authentication to simulate a device checking in.
 
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Start the server:**
-    ```bash
-    npm start
-    ```
-    The server will run on `http://localhost:3000`.
-
----
-
-## 🧪 Testing the Ingestion Endpoint (POST)
-
-To test the secure ping submission endpoint using a tool like Postman:
-
-1.  Set method to **`POST`** and URL to `http://localhost:3000/vehicles/1/pings`.
-2.  Go to the **Headers** tab and add a custom header:
-    *   **Key:** `X-API-Key`
-    *   **Value:** `key_v001`
-3.  Go to the **Body** tab, select **raw** and set the type to **JSON**. Paste the payload:
+### Request Specification
+*   **Method:** `POST`
+*   **Path:** `/vehicles/:vehicleId/pings`
+*   **Headers:**
+    *   `X-API-Key`: A unique per-vehicle key. The key follows the format `key_v` + 3-digit padded vehicle ID (e.g., `key_v001` for vehicle `1`, `key_v012` for vehicle `12`).
+    *   `Content-Type`: `application/json`
+*   **Payload (JSON):**
     ```json
     {
       "latitude": 6.9271,
@@ -97,4 +103,20 @@ To test the secure ping submission endpoint using a tool like Postman:
       "speed": 45.5
     }
     ```
-4.  Click **Send**. You should receive a `201 Created` status code and the created ping details in the response.
+
+### Expected Response (201 Created)
+*   **Headers:**
+    *   `Location`: `/vehicles/:vehicleId/pings/:pingId`
+    *   `ETag`: `":pingId"` (double-quoted ID of the created ping)
+    *   `Last-Modified`: A standard UTC date string representing when the ping was saved.
+*   **Body (JSON):**
+    ```json
+    {
+      "ping_id": 4153,
+      "vehicle_id": 1,
+      "timestamp": "2026-07-11T02:13:47.356Z",
+      "lat": 6.9271,
+      "lng": 79.8612,
+      "speed": 45.5
+    }
+    ```
