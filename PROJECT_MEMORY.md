@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-05
+> **Last updated:** 2026-07-11
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `prod`
@@ -30,8 +30,6 @@ WebAPIDev_Test/
 ├── package.json      ← { "start": "node index.js" }
 ├── seed.json         ← static data (689 KB, loaded once at startup)
 ├── render.yaml       ← Render deployment config
-├── vercel.json       ← Vercel config (not primary deployment)
-├── api/              ← (unused — ignore)
 └── .gitignore
 ```
 
@@ -107,6 +105,8 @@ const getLatestPing = (vehicleId) =>
 | GET | `/vehicles` | `[{ vehicle_id, reg_number, device_id, station_id }]` | |
 | GET | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id, last_ping }` | **Composite** — `last_ping` is nested `fmtPing()` object or `null` |
 | GET | `/vehicles/:vehicleId/pings` | `[{ ping_id, vehicle_id, timestamp, lat, lng, speed }]` | All pings for vehicle, scoped |
+| POST | `/vehicles/:vehicleId/pings` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Ingest new GPS ping. Requires valid `X-API-Key` |
+| GET | `/vehicles/:vehicleId/pings/:pingId` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Get specific ping |
 | GET | `/vehicles/:vehicleId/last-position` | `{ vehicle_id, timestamp, lat, lng, speed }` | **No** `ping_id`, **no** vehicle metadata |
 
 > ⚠️ There is NO bare `GET /pings` route — pings are always scoped to a vehicle.
@@ -122,6 +122,10 @@ All 404s return JSON (never HTML):
 { "error": "Station not found" }
 { "error": "Vehicle not found" }
 { "error": "No pings found for this vehicle" }
+{ "error": "Ping not found" }
+{ "error": "Missing X-API-Key header" }
+{ "error": "Invalid API key for this vehicle" }
+{ "error": "Missing required field: latitude" }
 ```
 
 ---
@@ -147,6 +151,8 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
+| `d0fc2d3` | Layer 4 - Add POST /vehicles/:vehicleId/pings with X-API-Key auth and GET /vehicles/:vehicleId/pings/:pingId | 2026-07-05 |
 | `2f985ac` | Layer 3 - Add /last-position | 2026-06-28 |
 | `6358f95` | Layer 2 - Upgrade the vehicle composite | 2026-06-28 |
 | `0fc6ef6` | Layer 1 - Fix all atomic routes | 2026-06-28 |
