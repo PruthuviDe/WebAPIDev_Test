@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-11
+> **Last updated:** 2026-07-12
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `prod`
@@ -10,7 +10,7 @@
 
 ## 1. Project Overview
 
-A minimal Express.js REST API (no database, no auth) that serves Sri Lanka police vehicle tracking data from a static `seed.json` file loaded into memory at startup. Built for a coursework submission following WSO2 REST API Design guidelines.
+A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data from a static `seed.json` file loaded into memory at startup. Built for a coursework submission following WSO2 REST API Design guidelines. All read (GET) routes are secured with HTTP Basic Authentication.
 
 **Stack:**
 - Runtime: Node.js ≥ 18
@@ -151,6 +151,7 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `95f6e94` | Layer 3 - Basic Auth on read routes (WSO2 §12.1) | 2026-07-12 |
 | `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
 | `d0fc2d3` | Layer 4 - Add POST /vehicles/:vehicleId/pings with X-API-Key auth and GET /vehicles/:vehicleId/pings/:pingId | 2026-07-05 |
 | `2f985ac` | Layer 3 - Add /last-position | 2026-06-28 |
