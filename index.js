@@ -47,7 +47,12 @@ const db = require(path.join(__dirname, 'seed.json'));
 const fmtProvince = p  => ({ province_id: p.id, name: p.name });
 const fmtDistrict = d  => ({ district_id: d.id, name: d.name, province_id: d.province_id });
 const fmtStation  = s  => ({ station_id: s.id, name: s.name, district_id: s.district_id });
-const fmtVehicle  = v  => ({ vehicle_id: v.id, reg_number: v.registration_number, device_id: v.device_id, station_id: v.station_id });
+const fmtVehicle  = v  => ({
+  vehicle_id: v.id,
+  reg_number: v.registration_number !== undefined ? v.registration_number : null,
+  device_id: v.device_id !== undefined ? v.device_id : null,
+  station_id: v.station_id !== undefined ? v.station_id : null
+});
 const fmtPing     = p  => ({ ping_id: p.id, vehicle_id: p.vehicle_id, timestamp: p.timestamp, lat: p.latitude, lng: p.longitude, speed: p.speed ?? null });
 
 // ── Query helpers ─────────────────────────────────────────────────────────────
@@ -143,6 +148,67 @@ app.get('/vehicles/:vehicleId/last-position', (req, res) => {
     lng:        latest.longitude,
     speed:      latest.speed ?? null
   });
+});
+
+// ── Vehicle CRUD ──────────────────────────────────────────────────────────────
+// POST /vehicles
+// Body: { vehicle_id, plateNumber, vehicleType, stationId }
+app.post('/vehicles', (req, res) => {
+  const { vehicle_id, plateNumber, vehicleType, stationId } = req.body ?? {};
+
+  if (vehicle_id === undefined) return res.status(400).json({ error: 'Missing required field: vehicle_id' });
+  if (plateNumber === undefined) return res.status(400).json({ error: 'Missing required field: plateNumber' });
+  if (vehicleType === undefined) return res.status(400).json({ error: 'Missing required field: vehicleType' });
+  if (stationId === undefined) return res.status(400).json({ error: 'Missing required field: stationId' });
+
+  // Map to database object schema
+  const newVehicle = {
+    id: Number(vehicle_id),
+    registration_number: plateNumber,
+    station_id: Number(stationId),
+    vehicle_type: vehicleType
+  };
+
+  db.vehicles.push(newVehicle);
+
+  res
+    .status(201)
+    .set('Location', `/vehicles/${newVehicle.id}`)
+    .json(fmtVehicle(newVehicle));
+});
+
+// PUT /vehicles/:vehicleId
+// Replaces the entire resource. Fields not in body are removed.
+app.put('/vehicles/:vehicleId', (req, res) => {
+  const vehicleId = Number(req.params.vehicleId);
+  const idx = db.vehicles.findIndex(v => v.id === vehicleId);
+  if (idx === -1) return res.status(404).json({ error: 'Vehicle not found' });
+
+  const { plateNumber, stationId, device_id, vehicleType } = req.body ?? {};
+
+  const updatedVehicle = {
+    id: vehicleId
+  };
+
+  if (plateNumber !== undefined) updatedVehicle.registration_number = plateNumber;
+  if (stationId !== undefined) updatedVehicle.station_id = Number(stationId);
+  if (device_id !== undefined) updatedVehicle.device_id = device_id;
+  if (vehicleType !== undefined) updatedVehicle.vehicle_type = vehicleType;
+
+  db.vehicles[idx] = updatedVehicle;
+
+  res.json(fmtVehicle(updatedVehicle));
+});
+
+// DELETE /vehicles/:vehicleId
+// Returns 200 on success. Second call returns 404. Pings remain in db.pings.
+app.delete('/vehicles/:vehicleId', (req, res) => {
+  const vehicleId = Number(req.params.vehicleId);
+  const idx = db.vehicles.findIndex(v => v.id === vehicleId);
+  if (idx === -1) return res.status(404).json({ error: 'Vehicle not found' });
+
+  db.vehicles.splice(idx, 1);
+  res.status(200).json({ message: 'Vehicle deleted successfully' });
 });
 
 // ── Ping ingestion ────────────────────────────────────────────────────────────
