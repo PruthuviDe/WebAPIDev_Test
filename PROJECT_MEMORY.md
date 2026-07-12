@@ -103,7 +103,10 @@ const getLatestPing = (vehicleId) =>
 | GET | `/stations` | `[{ station_id, name, district_id }]` | |
 | GET | `/stations/:stationId` | `{ station_id, name, district_id }` | 404 if not found |
 | GET | `/vehicles` | `[{ vehicle_id, reg_number, device_id, station_id }]` | |
+| POST | `/vehicles` | `{ vehicle_id, reg_number, device_id, station_id }` | Create a new vehicle. Body: `{ vehicle_id, plateNumber, vehicleType, stationId }` |
 | GET | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id, last_ping }` | **Composite** — `last_ping` is nested `fmtPing()` object or `null` |
+| PUT | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id }` | Replace entire vehicle resource. Fields omitted from body are removed |
+| DELETE | `/vehicles/:vehicleId` | `{ message }` | Delete vehicle resource. Returns 200. Subsequent calls return 404. Pings remain |
 | GET | `/vehicles/:vehicleId/pings` | `[{ ping_id, vehicle_id, timestamp, lat, lng, speed }]` | All pings for vehicle, scoped |
 | POST | `/vehicles/:vehicleId/pings` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Ingest new GPS ping. Requires valid `X-API-Key` |
 | GET | `/vehicles/:vehicleId/pings/:pingId` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Get specific ping |
@@ -151,6 +154,7 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `fe591f0` | Layer 4 - Vehicle CRUD (WSO2 §7) | 2026-07-12 |
 | `95f6e94` | Layer 3 - Basic Auth on read routes (WSO2 §12.1) | 2026-07-12 |
 | `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
 | `d0fc2d3` | Layer 4 - Add POST /vehicles/:vehicleId/pings with X-API-Key auth and GET /vehicles/:vehicleId/pings/:pingId | 2026-07-05 |
