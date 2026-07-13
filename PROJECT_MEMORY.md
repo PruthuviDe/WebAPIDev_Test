@@ -167,18 +167,17 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
-| `8ea29de` | Layer 3 - Secure admin write routes with Basic Auth | 2026-07-13 |
+| `92b1718` | chore: switch deploy branch configuration from prod to main | 2026-07-13 |
+| `7222b9c` | Layer 3 - Secure admin write routes with Basic Auth | 2026-07-13 |
+| `19f2b29` | chore: remove index.js and update PROJECT_MEMORY for layered arch | 2026-07-13 |
 | `9ca92e5` | Refactor: split single-file index.js into layered architecture | 2026-07-13 |
-| `fe591f0` | Layer 4 - Vehicle CRUD (WSO2 §7) | 2026-07-12 |
-| `95f6e94` | Layer 3 - Basic Auth on read routes (WSO2 §12.1) | 2026-07-12 |
+| `4e26bf3` | docs: update PROJECT_MEMORY.md to document Vehicle CRUD routes | 2026-07-12 |
+| `6d5fbae` | docs: update PROJECT_MEMORY.md to document Basic Auth requirements | 2026-07-12 |
+| `29133ab` | docs: refactor README.md to use professional, emoji-free, and well-structured formatting | 2026-07-11 |
+| `cb0dc55` | docs: update README.md with comprehensive student-friendly project overview and guides | 2026-07-11 |
+| `3912295` | docs: update PROJECT_MEMORY.md to reflect Vercel config removal and new Layer 4 endpoints | 2026-07-11 |
 | `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
 | `d0fc2d3` | Layer 4 - Add POST /vehicles/:vehicleId/pings with X-API-Key auth and GET /vehicles/:vehicleId/pings/:pingId | 2026-07-05 |
-| `2f985ac` | Layer 3 - Add /last-position | 2026-06-28 |
-| `6358f95` | Layer 2 - Upgrade the vehicle composite | 2026-06-28 |
-| `0fc6ef6` | Layer 1 - Fix all atomic routes | 2026-06-28 |
-| `a3b2228` | S4: REST routes | 2026-06-28 |
-| `e5f33d3` | S2: hello-world app | 2026-06-28 |
-| `1783bdf` | S2: seed data | 2026-06-21 |
 
 **Commit message convention:** `Layer N - <description>` or `S<num>: <description>`
 
