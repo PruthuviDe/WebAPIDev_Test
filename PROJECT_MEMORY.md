@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-12
+> **Last updated:** 2026-07-13
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `prod`
@@ -17,7 +17,7 @@ A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data
 - Framework: Express 4.x
 - Data: `seed.json` (in-memory, loaded once at startup via `require()`)
 - Deployment: Render (Web Service) — auto-deploys on push to `prod`
-- Start command: `node index.js`
+- Start command: `node server.js`
 - Port: `process.env.PORT || 3000`
 
 ---
@@ -26,16 +26,29 @@ A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data
 
 ```
 WebAPIDev_Test/
-├── index.js          ← sole entry point — all routes live here
-├── package.json      ← { "start": "node index.js" }
-├── seed.json         ← static data (689 KB, loaded once at startup)
-├── render.yaml       ← Render deployment config
+├── server.js                      ← entry point (listen only)
+├── src/
+│   ├── app.js                     ← Express setup, middleware, router mounting
+│   ├── data/
+│   │   └── db.js                  ← loads seed.json once; exports db
+│   ├── middleware/
+│   │   └── basicAuth.js           ← Basic Auth guard (GET requests only)
+│   ├── helpers/
+│   │   └── formatters.js          ← fmtProvince/District/Station/Vehicle/Ping,
+│   │                                 getLatestPing, nextId, deviceKeys
+│   └── routes/
+│       ├── geography.routes.js    ← /provinces, /districts, /stations
+│       ├── vehicle.routes.js      ← /vehicles CRUD + sub-routes
+│       └── ping.routes.js         ← POST + GET /vehicles/:id/pings
+├── package.json                   ← { "start": "node server.js" }
+├── seed.json                      ← static data (689 KB, loaded once)
+├── render.yaml                    ← Render deployment config
 └── .gitignore
 ```
 
-**Do NOT split routes into separate files unless explicitly asked.**
 **Do NOT add a database (MongoDB, Postgres, SQLite, etc.) — seed.json only.**
 **Do NOT add authentication or middleware unless explicitly asked.**
+**Branch `feature/layered-arch` holds the refactored code. Merge to `prod` when approved.**
 
 ---
 
@@ -70,7 +83,7 @@ Loaded as: `const db = require(path.join(__dirname, 'seed.json'));`
 
 ---
 
-## 5. Shape Helpers (index.js lines 9–14)
+## 5. Shape Helpers (src/helpers/formatters.js)
 
 ```js
 const fmtProvince = p  => ({ province_id: p.id, name: p.name });
@@ -154,6 +167,7 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `9ca92e5` | Refactor: split single-file index.js into layered architecture | 2026-07-13 |
 | `fe591f0` | Layer 4 - Vehicle CRUD (WSO2 §7) | 2026-07-12 |
 | `95f6e94` | Layer 3 - Basic Auth on read routes (WSO2 §12.1) | 2026-07-12 |
 | `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
