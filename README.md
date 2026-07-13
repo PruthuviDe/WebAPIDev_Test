@@ -5,7 +5,7 @@ This is a RESTful API built with Node.js and Express, designed for tracking poli
 *   **Student Index:** COBSCCOMP251P-016
 *   **Target Platform:** Render
 *   **Production URL:** https://webapidev-test-8luf.onrender.com
-*   **Postman Collection Link:** [Sri Lanka Police API Workspace Collection](https://www.postman.com/pruthuvidesilva/my-workspace/collection/56594354-7c9901c7-4d86-4f39-9092-220be766ac3a?action=share&source=copy-link&creator=56594354)
+*   **Postman Workspace Link:** [Sri Lanka Police API Workspace](https://www.postman.com/warped-firefly-225285/workspace/my-workspace)
 
 ---
 
@@ -154,7 +154,7 @@ By default, the server listens on port `3000` (`http://localhost:3000`).
 
 ### Postman Testing (Recommended)
 A pre-configured Postman Collection is published in the Postman Workspace. You can access the collection directly to run, test, and audit endpoints:
-*   [Sri Lanka Police API Workspace Collection Link](https://www.postman.com/pruthuvidesilva/my-workspace/collection/56594354-7c9901c7-4d86-4f39-9092-220be766ac3a?action=share&source=copy-link&creator=56594354)
+*   [Sri Lanka Police API Workspace Link](https://www.postman.com/warped-firefly-225285/workspace/my-workspace)
 
 Inside the workspace, you will find folder-based configurations mapping all use cases (Local and Live Render testing via variable toggles).
 
