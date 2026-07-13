@@ -160,6 +160,7 @@ All 404s return JSON (never HTML):
 - **Repo:** `PruthuviDe/WebAPIDev_Test`
 - **Active branch:** `main`
 - **Push command:** `git push origin main`
+- **CI/CD Workflow:** `.github/workflows/deploy.yml` triggers Render deployment via Deploy Hook secret (`RENDER_DEPLOY_HOOK`) on push to `main`
 
 ---
 
