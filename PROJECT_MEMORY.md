@@ -3,7 +3,7 @@
 > **Last updated:** 2026-07-13
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
-> **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `prod`
+> **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `main`
 > **Live URL:** https://webapidev-test-8luf.onrender.com
 
 ---
@@ -16,7 +16,7 @@ A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data
 - Runtime: Node.js ≥ 18
 - Framework: Express 4.x
 - Data: `seed.json` (in-memory, loaded once at startup via `require()`)
-- Deployment: Render (Web Service) — auto-deploys on push to `prod`
+- Deployment: Render (Web Service) — auto-deploys on push to `main`
 - Start command: `node server.js`
 - Port: `process.env.PORT || 3000`
 
@@ -48,7 +48,7 @@ WebAPIDev_Test/
 
 **Do NOT add a database (MongoDB, Postgres, SQLite, etc.) — seed.json only.**
 **Do NOT add authentication or middleware unless explicitly asked.**
-**Branch `feature/layered-arch` holds the refactored code. Merge to `prod` when approved.**
+**Branch `feature/layered-arch` holds the refactored code. Merge to `main` when approved.**
 
 ---
 
@@ -150,7 +150,7 @@ All 404s return JSON (never HTML):
 
 ### Render
 - **Service:** `WebAPIDev_Test` (`srv-d8n3jnmrnols73d8ro6g`)
-- **Branch:** `prod` — auto-deploys on every push
+- **Branch:** `main` — auto-deploys on every push
 - **URL:** https://webapidev-test-8luf.onrender.com
 - **Region:** Virginia
 - **Plan:** Free
@@ -158,8 +158,8 @@ All 404s return JSON (never HTML):
 
 ### GitHub
 - **Repo:** `PruthuviDe/WebAPIDev_Test`
-- **Active branch:** `prod`
-- **Push command:** `git push origin prod`
+- **Active branch:** `main`
+- **Push command:** `git push origin main`
 
 ---
 

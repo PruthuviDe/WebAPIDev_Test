@@ -30,7 +30,7 @@
 
 9. **`speed` is always `null`** — seed.json pings have no speed field. Do not fabricate.
 
-10. **Deploy branch is `prod`.** Push with `git push origin prod`. Render auto-deploys.
+10. **Deploy branch is `main`.** Push with `git push origin main`. Render auto-deploys.
 
 11. **Commit message format:** `Layer N - <description>` or `S<num>: <description>`.
 
