@@ -167,6 +167,7 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `8ea29de` | Layer 3 - Secure admin write routes with Basic Auth | 2026-07-13 |
 | `9ca92e5` | Refactor: split single-file index.js into layered architecture | 2026-07-13 |
 | `fe591f0` | Layer 4 - Vehicle CRUD (WSO2 §7) | 2026-07-12 |
 | `95f6e94` | Layer 3 - Basic Auth on read routes (WSO2 §12.1) | 2026-07-12 |

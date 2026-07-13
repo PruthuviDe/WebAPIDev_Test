@@ -26,12 +26,13 @@ const basicAuth = (req, res, next) => {
   next();
 };
 
-// Guard: apply basicAuth only to GET requests.
+// Guard: apply basicAuth to all GET routes and all admin write routes (POST /vehicles, PUT /vehicles/:id, DELETE /vehicles/:id).
+// It must NOT be applied to the device ping ingestion route: POST /vehicles/:vehicleId/pings.
 const applyBasicAuth = (req, res, next) => {
-  if (req.method === 'GET') {
-    return basicAuth(req, res, next);
+  if (req.method === 'POST' && req.path.match(/^\/vehicles\/[^\/]+\/pings\/?$/)) {
+    return next();
   }
-  next();
+  return basicAuth(req, res, next);
 };
 
 module.exports = applyBasicAuth;
