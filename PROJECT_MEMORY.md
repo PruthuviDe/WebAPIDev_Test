@@ -10,7 +10,7 @@
 
 ## 1. Project Overview
 
-A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data backed by a persistent MongoDB database (auto-seeded from `seed.json` on initial connection). Built for a coursework submission following WSO2 REST API Design guidelines. All read (GET) routes are secured with HTTP Basic Authentication.
+A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data backed by a persistent MongoDB database (auto-seeded from `seed.json` on initial connection). Built for a coursework submission following WSO2 REST API Design guidelines. Protected by JWT Bearer Authentication and Role-Based Access Control (RBAC), alongside `X-API-Key` hardware auth for vehicle GPS ingestion.
 
 **Stack:**
 - Runtime: Node.js ≥ 18
@@ -108,18 +108,20 @@ const getLatestPing = (vehicleId) =>
 
 | Method | Path | Response shape | Notes |
 |--------|------|---------------|-------|
-| GET | `/` | `{ status, session }` | Health check · `session: "NB6007CEM S2"` |
-| GET | `/provinces` | `[{ province_id, name }]` | |
+| GET | `/` | `{ status, session, auth }` | Health check · `auth: "JWT + RBAC"` |
+| POST | `/auth/login` | `{ token_type, access_token, expires_in, user }` | Public · Exchange credentials (`username`, `password`) for JWT Bearer token |
+| GET | `/auth/me` | `{ user }` | Returns authenticated user profile |
+| GET | `/provinces` | `[{ province_id, name }]` | Requires JWT Bearer Token |
 | GET | `/provinces/:provinceId` | `{ province_id, name }` | 404 if not found |
-| GET | `/districts` | `[{ district_id, name, province_id }]` | |
+| GET | `/districts` | `[{ district_id, name, province_id }]` | Requires JWT Bearer Token |
 | GET | `/districts/:districtId` | `{ district_id, name, province_id }` | 404 if not found |
-| GET | `/stations` | `[{ station_id, name, district_id }]` | |
+| GET | `/stations` | `[{ station_id, name, district_id }]` | Requires JWT Bearer Token |
 | GET | `/stations/:stationId` | `{ station_id, name, district_id }` | 404 if not found |
-| GET | `/vehicles` | `[{ vehicle_id, reg_number, device_id, station_id }]` | |
-| POST | `/vehicles` | `{ vehicle_id, reg_number, device_id, station_id }` | Create a new vehicle. Body: `{ vehicle_id, plateNumber, vehicleType, stationId }` |
+| GET | `/vehicles` | `[{ vehicle_id, reg_number, device_id, station_id }]` | Requires JWT Bearer Token |
+| POST | `/vehicles` | `{ vehicle_id, reg_number, device_id, station_id }` | Restricted to `ADMIN` role. Body: `{ vehicle_id, plateNumber, vehicleType, stationId }` |
 | GET | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id, last_ping }` | **Composite** — `last_ping` is nested `fmtPing()` object or `null` |
-| PUT | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id }` | Replace entire vehicle resource. Fields omitted from body are removed |
-| DELETE | `/vehicles/:vehicleId` | `{ message }` | Delete vehicle resource. Returns 200. Subsequent calls return 404. Pings remain |
+| PUT | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id }` | Restricted to `ADMIN` role. Replace entire vehicle resource |
+| DELETE | `/vehicles/:vehicleId` | `{ message }` | Restricted to `ADMIN` role. Delete vehicle resource |
 | GET | `/vehicles/:vehicleId/pings` | `[{ ping_id, vehicle_id, timestamp, lat, lng, speed }]` | All pings for vehicle, scoped |
 | POST | `/vehicles/:vehicleId/pings` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Ingest new GPS ping. Requires valid `X-API-Key` |
 | GET | `/vehicles/:vehicleId/pings/:pingId` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Get specific ping |
@@ -177,6 +179,7 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `a4c9f10` | feat: implement JWT authentication and Role-Based Access Control (RBAC) | 2026-07-19 |
 | `41a0d62` | chore: trigger redeploy after Atlas IP access list update | 2026-07-19 |
 | `b133d57` | fix: resolveUri detects legacy shard URIs and falls back to clean SRV URI | 2026-07-19 |
 | `d39740d` | fix: update MongoClient with explicit tls and tlsAllowInvalidCertificates options | 2026-07-19 |

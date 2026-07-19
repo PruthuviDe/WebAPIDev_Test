@@ -1,10 +1,11 @@
 const express = require('express');
 const { getDB } = require('../data/db');
 const { fmtVehicle, fmtPing, getLatestPing } = require('../helpers/formatters');
+const { requireRole } = require('../middleware/jwtAuth');
 
 const router = express.Router();
 
-// GET /vehicles
+// GET /vehicles — Accessible by ADMIN, DISPATCHER, OFFICER
 router.get('/', async (req, res) => {
   try {
     const db = await getDB();
@@ -16,7 +17,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /vehicles/:vehicleId
+// GET /vehicles/:vehicleId — Accessible by ADMIN, DISPATCHER, OFFICER
 router.get('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
@@ -34,7 +35,7 @@ router.get('/:vehicleId', async (req, res) => {
   }
 });
 
-// GET /vehicles/:vehicleId/pings
+// GET /vehicles/:vehicleId/pings — Accessible by ADMIN, DISPATCHER, OFFICER
 router.get('/:vehicleId/pings', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
@@ -54,7 +55,7 @@ router.get('/:vehicleId/pings', async (req, res) => {
   }
 });
 
-// GET /vehicles/:vehicleId/last-position
+// GET /vehicles/:vehicleId/last-position — Accessible by ADMIN, DISPATCHER, OFFICER
 router.get('/:vehicleId/last-position', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
@@ -80,8 +81,8 @@ router.get('/:vehicleId/last-position', async (req, res) => {
   }
 });
 
-// POST /vehicles
-router.post('/', async (req, res) => {
+// POST /vehicles — Restricted to ADMIN role
+router.post('/', requireRole(['ADMIN']), async (req, res) => {
   try {
     const { vehicle_id, plateNumber, vehicleType, stationId } = req.body ?? {};
 
@@ -110,8 +111,8 @@ router.post('/', async (req, res) => {
   }
 });
 
-// PUT /vehicles/:vehicleId — replaces the entire resource
-router.put('/:vehicleId', async (req, res) => {
+// PUT /vehicles/:vehicleId — Restricted to ADMIN role
+router.put('/:vehicleId', requireRole(['ADMIN']), async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
@@ -138,8 +139,8 @@ router.put('/:vehicleId', async (req, res) => {
   }
 });
 
-// DELETE /vehicles/:vehicleId — pings are kept (immutability rule)
-router.delete('/:vehicleId', async (req, res) => {
+// DELETE /vehicles/:vehicleId — Restricted to ADMIN role
+router.delete('/:vehicleId', requireRole(['ADMIN']), async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();

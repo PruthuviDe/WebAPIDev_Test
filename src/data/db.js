@@ -1,5 +1,6 @@
 const { MongoClient } = require('mongodb');
 const path = require('path');
+const bcrypt = require('bcryptjs');
 
 let client;
 let dbInstance;
@@ -7,18 +8,11 @@ let connectPromise;
 
 const seedData = require(path.join(__dirname, '../../seed.json'));
 
-// Clean SRV URI — used as the default if MONGODB_URI is not set or is a legacy string.
-// The legacy direct-shard URI (ssl=true, replicaSet=...) causes TLS alert 80 on cloud hosts
-// running OpenSSL 3.x. The SRV URI lets the driver negotiate TLS correctly.
+// Clean SRV URI — used as the default if MONGODB_URI is not set in environment.
 const ATLAS_SRV_URI = 'mongodb+srv://pruthuvide_db_user:PgQK5xYiz6pORd0s@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority';
 
 function resolveUri() {
-  const raw = process.env.MONGODB_URI || '';
-  // If env var is unset, is a localhost URI, or is the legacy direct-shard format, use SRV.
-  if (!raw || raw.includes('localhost') || raw.includes('shard-00') || raw.includes('ssl=true')) {
-    return ATLAS_SRV_URI;
-  }
-  return raw;
+  return process.env.MONGODB_URI || ATLAS_SRV_URI;
 }
 
 async function connectDB() {
@@ -34,6 +28,7 @@ async function connectDB() {
     dbInstance = client.db();
 
     await seedIfEmpty(dbInstance);
+    await seedUsersIfEmpty(dbInstance);
 
     console.log('MongoDB connected successfully.');
     return dbInstance;
@@ -51,6 +46,46 @@ async function seedIfEmpty(db) {
       await col.insertMany(seedData[name]);
       console.log(`Seeded collection '${name}' with ${seedData[name].length} records.`);
     }
+  }
+}
+
+async function seedUsersIfEmpty(db) {
+  const col = db.collection('users');
+  const count = await col.countDocuments();
+  if (count === 0) {
+    const adminPassword      = await bcrypt.hash('Admin@123', 10);
+    const dispatcherPassword = await bcrypt.hash('Dispatch@123', 10);
+    const officerPassword    = await bcrypt.hash('Officer@123', 10);
+
+    const initialUsers = [
+      {
+        id: 1,
+        username: 'admin_user',
+        password_hash: adminPassword,
+        role: 'ADMIN',
+        station_id: null,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 2,
+        username: 'dispatcher_colombo',
+        password_hash: dispatcherPassword,
+        role: 'DISPATCHER',
+        station_id: 1,
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 3,
+        username: 'officer_patrol',
+        password_hash: officerPassword,
+        role: 'OFFICER',
+        station_id: 1,
+        created_at: new Date().toISOString()
+      }
+    ];
+
+    await col.insertMany(initialUsers);
+    console.log('Seeded collection \'users\' with 3 default accounts.');
   }
 }
 

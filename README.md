@@ -92,19 +92,23 @@ The API strictly adheres to WSO2 REST API design specifications:
 
 ## 5. Security Configuration
 
-The API implements a dual-security boundary based on the client persona:
+The API implements a dual-security boundary based on client persona:
 
-### A. HTTP Basic Authentication (Admin & Police Users)
-All read (GET) paths and Admin write paths (`POST /vehicles`, `PUT /vehicles/:id`, `DELETE /vehicles/:id`) are protected by HTTP Basic Authentication.
-*   **Credentials:** `police:nibm2024`
-*   **Authorization Header:** `Authorization: Basic cG9saWNlOm5pYm0yMDI0`
-*   **Challenge Header:** Unauthenticated requests receive a `401 Unauthorized` status along with a `WWW-Authenticate: Basic realm="Police API"` header.
+### A. JWT Authentication & Role-Based Access Control (Users & Administrators)
+Protected HTTP routes require a JSON Web Token (JWT) provided in the HTTP `Authorization` header.
+
+*   **Header Format:** `Authorization: Bearer <jwt_token>`
+*   **Obtaining a Token:** Exchange credentials via `POST /auth/login`.
+*   **Pre-Seeded Test Accounts:**
+    *   **Administrator Account:** `admin_user` / `Admin@123` (Role: `ADMIN` — full access to read, create, update, and delete vehicle resources).
+    *   **Dispatcher Account:** `dispatcher_colombo` / `Dispatch@123` (Role: `DISPATCHER` — full read access to vehicles, positions, and pings).
+    *   **Patrol Officer Account:** `officer_patrol` / `Officer@123` (Role: `OFFICER` — read access to vehicle registry and positions).
 
 ### B. Device API Key Authentication (Vehicles/Ingestion Devices)
-The ingestion endpoint (`POST /vehicles/:vehicleId/pings`) is accessed by automated tracking hardware. It bypasses Basic Auth and is secured using a unique API Key.
+The GPS ingestion endpoint (`POST /vehicles/:vehicleId/pings`) is accessed by automated tracking hardware mounted on police vehicles. It bypasses JWT user authentication and is secured using a unique API Key.
 *   **Header:** `X-API-Key`
 *   **Format:** `key_v` + 3-digit zero-padded vehicle ID (e.g., `key_v001` for vehicle 1, `key_v012` for vehicle 12).
-*   **Key Validation:** The key is compared deterministically against the specific vehicle ID in the path.
+*   **Key Validation:** The key is compared deterministically against the specific vehicle ID in the request path.
 
 ---
 

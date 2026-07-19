@@ -1,21 +1,25 @@
 const express = require('express');
-const applyBasicAuth  = require('./middleware/basicAuth');
-const geo             = require('./routes/geography.routes');
-const vehicleRouter   = require('./routes/vehicle.routes');
-const pingRouter      = require('./routes/ping.routes');
+const { jwtAuth }   = require('./middleware/jwtAuth');
+const authRouter    = require('./routes/auth.routes');
+const geo           = require('./routes/geography.routes');
+const vehicleRouter = require('./routes/vehicle.routes');
+const pingRouter    = require('./routes/ping.routes');
 
 const app = express();
 
 // ── Parse JSON bodies ─────────────────────────────────────────────────────────
 app.use(express.json());
 
-// ── Auth guard (GET requests only) ────────────────────────────────────────────
-app.use(applyBasicAuth);
+// ── JWT Authentication Guard ───────────────────────────────────────────────────
+app.use(jwtAuth);
 
 // ── Root health check ─────────────────────────────────────────────────────────
 app.get('/', (req, res) => {
-  res.json({ status: 'ok', session: 'NB6007CEM S2' });
+  res.json({ status: 'ok', session: 'NB6007CEM S2', auth: 'JWT + RBAC' });
 });
+
+// ── Auth routes (login + user profile) ─────────────────────────────────────────
+app.use('/auth', authRouter);
 
 // ── Geography routes ──────────────────────────────────────────────────────────
 app.use('/provinces', geo.provinces);
