@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     res.json(list.map(fmtVehicle));
   } catch (err) {
     console.error('Vehicles GET error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -21,14 +21,16 @@ router.get('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
-    const record = await db.collection('vehicles').findOne({ id: vehicleId });
+    const record = await db.collection('vehicles').findOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    });
     if (!record) return res.status(404).json({ error: 'Vehicle not found' });
 
     const lastPing = await getLatestPing(vehicleId);
     res.json({ ...fmtVehicle(record), last_ping: lastPing ? fmtPing(lastPing) : null });
   } catch (err) {
     console.error('Vehicle GET by id error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -37,14 +39,18 @@ router.get('/:vehicleId/pings', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
-    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
+    const vehicle = await db.collection('vehicles').findOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
-    const pings = await db.collection('pings').find({ vehicle_id: vehicleId }).toArray();
-    res.json(pings.map(fmtPing));
+    const pings = await db.collection('pings').find({
+      $or: [{ vehicle_id: vehicleId }, { vehicle_id: String(req.params.vehicleId) }]
+    }).toArray();
+    res.json(pings.map(fmtPing).filter(Boolean));
   } catch (err) {
     console.error('Vehicle pings GET error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -53,7 +59,9 @@ router.get('/:vehicleId/last-position', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
-    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
+    const vehicle = await db.collection('vehicles').findOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
     const latest = await getLatestPing(vehicleId);
@@ -68,7 +76,7 @@ router.get('/:vehicleId/last-position', async (req, res) => {
     });
   } catch (err) {
     console.error('Vehicle last-position GET error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -98,7 +106,7 @@ router.post('/', async (req, res) => {
       .json(fmtVehicle(newVehicle));
   } catch (err) {
     console.error('Vehicle POST error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -107,7 +115,9 @@ router.put('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
-    const existing = await db.collection('vehicles').findOne({ id: vehicleId });
+    const existing = await db.collection('vehicles').findOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    });
     if (!existing) return res.status(404).json({ error: 'Vehicle not found' });
 
     const { plateNumber, stationId, device_id, vehicleType } = req.body ?? {};
@@ -118,11 +128,13 @@ router.put('/:vehicleId', async (req, res) => {
     if (device_id   !== undefined) updatedVehicle.device_id           = device_id;
     if (vehicleType !== undefined) updatedVehicle.vehicle_type        = vehicleType;
 
-    await db.collection('vehicles').replaceOne({ id: vehicleId }, updatedVehicle);
+    await db.collection('vehicles').replaceOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    }, updatedVehicle);
     res.json(fmtVehicle(updatedVehicle));
   } catch (err) {
     console.error('Vehicle PUT error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 
@@ -131,13 +143,15 @@ router.delete('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
     const db = await getDB();
-    const result = await db.collection('vehicles').deleteOne({ id: vehicleId });
+    const result = await db.collection('vehicles').deleteOne({
+      $or: [{ id: vehicleId }, { id: String(req.params.vehicleId) }]
+    });
     if (result.deletedCount === 0) return res.status(404).json({ error: 'Vehicle not found' });
 
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (err) {
     console.error('Vehicle DELETE error:', err);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'Database error', details: err.message });
   }
 });
 

@@ -13,14 +13,17 @@ const fmtVehicle = v => ({
   station_id: v.station_id          !== undefined ? v.station_id          : null
 });
 
-const fmtPing = p => ({
-  ping_id:    p.id,
-  vehicle_id: p.vehicle_id,
-  timestamp:  p.timestamp,
-  lat:        p.latitude !== undefined ? p.latitude : (p.lat !== undefined ? p.lat : null),
-  lng:        p.longitude !== undefined ? p.longitude : (p.lng !== undefined ? p.lng : null),
-  speed:      p.speed ?? null
-});
+const fmtPing = p => {
+  if (!p) return null;
+  return {
+    ping_id:    p.id !== undefined ? p.id : (p.ping_id !== undefined ? p.ping_id : null),
+    vehicle_id: p.vehicle_id !== undefined ? p.vehicle_id : null,
+    timestamp:  p.timestamp !== undefined ? p.timestamp : null,
+    lat:        p.latitude !== undefined ? p.latitude : (p.lat !== undefined ? p.lat : null),
+    lng:        p.longitude !== undefined ? p.longitude : (p.lng !== undefined ? p.lng : null),
+    speed:      p.speed ?? null
+  };
+};
 
 // ── Query helpers ─────────────────────────────────────────────────────────────
 const { getDB } = require('../data/db');
@@ -28,8 +31,11 @@ const { getDB } = require('../data/db');
 // Returns the single most-recent ping for a vehicle, or null if none exist.
 const getLatestPing = async (vehicleId) => {
   const db = await getDB();
+  const numericId = Number(vehicleId);
   return await db.collection('pings')
-    .find({ vehicle_id: Number(vehicleId) })
+    .find({
+      $or: [{ vehicle_id: numericId }, { vehicle_id: String(vehicleId) }]
+    })
     .sort({ timestamp: -1, id: -1 })
     .limit(1)
     .next();
@@ -43,7 +49,7 @@ const nextId = async (collectionName) => {
     .sort({ id: -1 })
     .limit(1)
     .next();
-  return latestDoc && latestDoc.id ? latestDoc.id + 1 : 1;
+  return latestDoc && latestDoc.id ? Number(latestDoc.id) + 1 : 1;
 };
 
 // Deterministic key per vehicle derived from its numeric id:
