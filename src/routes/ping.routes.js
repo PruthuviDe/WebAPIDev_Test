@@ -17,8 +17,10 @@ router.post('/:vehicleId/pings', async (req, res) => {
     const apiKey = req.headers['x-api-key'];
     if (!apiKey) return res.status(401).json({ error: 'Missing X-API-Key header' });
 
+    const db = await getDB();
+
     // 404 — vehicle not found (checked before key match to avoid leaking key info)
-    const vehicle = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
     // 403 — key does not match this vehicle's expected key
@@ -41,7 +43,7 @@ router.post('/:vehicleId/pings', async (req, res) => {
       speed:      Number(speed),
       timestamp:  new Date().toISOString()  // server-authoritative timestamp
     };
-    await getDB().collection('pings').insertOne(newPing);
+    await db.collection('pings').insertOne(newPing);
 
     const location     = `/vehicles/${vehicleIdStr}/pings/${newPing.id}`;
     const lastModified = new Date(newPing.timestamp).toUTCString();
@@ -53,6 +55,7 @@ router.post('/:vehicleId/pings', async (req, res) => {
       .set('Last-Modified', lastModified)
       .json(fmtPing(newPing));
   } catch (err) {
+    console.error('Ping POST error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -63,14 +66,16 @@ router.get('/:vehicleId/pings/:pingId', async (req, res) => {
     const vehicleId = Number(req.params.vehicleId);
     const pingId    = Number(req.params.pingId);
 
-    const vehicle = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const db = await getDB();
+    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
-    const ping = await getDB().collection('pings').findOne({ id: pingId, vehicle_id: vehicleId });
+    const ping = await db.collection('pings').findOne({ id: pingId, vehicle_id: vehicleId });
     if (!ping) return res.status(404).json({ error: 'Ping not found' });
 
     res.json(fmtPing(ping));
   } catch (err) {
+    console.error('Ping GET by id error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });

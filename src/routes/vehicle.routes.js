@@ -7,9 +7,11 @@ const router = express.Router();
 // GET /vehicles
 router.get('/', async (req, res) => {
   try {
-    const list = await getDB().collection('vehicles').find({}).toArray();
+    const db = await getDB();
+    const list = await db.collection('vehicles').find({}).toArray();
     res.json(list.map(fmtVehicle));
   } catch (err) {
+    console.error('Vehicles GET error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -18,12 +20,14 @@ router.get('/', async (req, res) => {
 router.get('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
-    const record = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const db = await getDB();
+    const record = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!record) return res.status(404).json({ error: 'Vehicle not found' });
 
     const lastPing = await getLatestPing(vehicleId);
     res.json({ ...fmtVehicle(record), last_ping: lastPing ? fmtPing(lastPing) : null });
   } catch (err) {
+    console.error('Vehicle GET by id error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -32,12 +36,14 @@ router.get('/:vehicleId', async (req, res) => {
 router.get('/:vehicleId/pings', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
-    const vehicle = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const db = await getDB();
+    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
-    const pings = await getDB().collection('pings').find({ vehicle_id: vehicleId }).toArray();
+    const pings = await db.collection('pings').find({ vehicle_id: vehicleId }).toArray();
     res.json(pings.map(fmtPing));
   } catch (err) {
+    console.error('Vehicle pings GET error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -46,7 +52,8 @@ router.get('/:vehicleId/pings', async (req, res) => {
 router.get('/:vehicleId/last-position', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
-    const vehicle = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const db = await getDB();
+    const vehicle = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!vehicle) return res.status(404).json({ error: 'Vehicle not found' });
 
     const latest = await getLatestPing(vehicleId);
@@ -60,6 +67,7 @@ router.get('/:vehicleId/last-position', async (req, res) => {
       speed:      latest.speed ?? null
     });
   } catch (err) {
+    console.error('Vehicle last-position GET error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -81,13 +89,15 @@ router.post('/', async (req, res) => {
       vehicle_type:        vehicleType
     };
 
-    await getDB().collection('vehicles').insertOne(newVehicle);
+    const db = await getDB();
+    await db.collection('vehicles').insertOne(newVehicle);
 
     res
       .status(201)
       .set('Location', `/vehicles/${newVehicle.id}`)
       .json(fmtVehicle(newVehicle));
   } catch (err) {
+    console.error('Vehicle POST error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -96,7 +106,8 @@ router.post('/', async (req, res) => {
 router.put('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
-    const existing = await getDB().collection('vehicles').findOne({ id: vehicleId });
+    const db = await getDB();
+    const existing = await db.collection('vehicles').findOne({ id: vehicleId });
     if (!existing) return res.status(404).json({ error: 'Vehicle not found' });
 
     const { plateNumber, stationId, device_id, vehicleType } = req.body ?? {};
@@ -107,9 +118,10 @@ router.put('/:vehicleId', async (req, res) => {
     if (device_id   !== undefined) updatedVehicle.device_id           = device_id;
     if (vehicleType !== undefined) updatedVehicle.vehicle_type        = vehicleType;
 
-    await getDB().collection('vehicles').replaceOne({ id: vehicleId }, updatedVehicle);
+    await db.collection('vehicles').replaceOne({ id: vehicleId }, updatedVehicle);
     res.json(fmtVehicle(updatedVehicle));
   } catch (err) {
+    console.error('Vehicle PUT error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -118,11 +130,13 @@ router.put('/:vehicleId', async (req, res) => {
 router.delete('/:vehicleId', async (req, res) => {
   try {
     const vehicleId = Number(req.params.vehicleId);
-    const result = await getDB().collection('vehicles').deleteOne({ id: vehicleId });
+    const db = await getDB();
+    const result = await db.collection('vehicles').deleteOne({ id: vehicleId });
     if (result.deletedCount === 0) return res.status(404).json({ error: 'Vehicle not found' });
 
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (err) {
+    console.error('Vehicle DELETE error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });

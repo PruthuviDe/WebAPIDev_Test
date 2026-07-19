@@ -38,11 +38,9 @@ async function seedIfEmpty(db) {
   }
 }
 
-function getDB() {
-  if (!dbInstance) {
-    throw new Error('Database not initialized. Ensure connectDB() is called.');
-  }
-  return dbInstance;
+async function getDB() {
+  if (dbInstance) return dbInstance;
+  return await connectDB();
 }
 
 module.exports = { connectDB, getDB };

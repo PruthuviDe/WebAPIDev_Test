@@ -27,7 +27,7 @@ const { getDB } = require('../data/db');
 
 // Returns the single most-recent ping for a vehicle, or null if none exist.
 const getLatestPing = async (vehicleId) => {
-  const db = getDB();
+  const db = await getDB();
   return await db.collection('pings')
     .find({ vehicle_id: Number(vehicleId) })
     .sort({ timestamp: -1, id: -1 })
@@ -37,7 +37,7 @@ const getLatestPing = async (vehicleId) => {
 
 // Next integer ID for a given collection name.
 const nextId = async (collectionName) => {
-  const db = getDB();
+  const db = await getDB();
   const latestDoc = await db.collection(collectionName)
     .find({})
     .sort({ id: -1 })
