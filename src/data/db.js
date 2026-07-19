@@ -1,24 +1,29 @@
 const { MongoClient } = require('mongodb');
 const path = require('path');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/police_db';
 let client;
 let dbInstance;
+let connectPromise;
 
 const seedData = require(path.join(__dirname, '../../seed.json'));
 
 async function connectDB() {
   if (dbInstance) return dbInstance;
+  if (connectPromise) return connectPromise;
 
-  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/police_db';
-  client = new MongoClient(uri);
-  await client.connect();
-  dbInstance = client.db();
+  connectPromise = (async () => {
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/police_db';
+    client = new MongoClient(uri);
+    await client.connect();
+    dbInstance = client.db();
 
-  await seedIfEmpty(dbInstance);
+    await seedIfEmpty(dbInstance);
 
-  console.log('MongoDB connected successfully.');
-  return dbInstance;
+    console.log('MongoDB connected successfully.');
+    return dbInstance;
+  })();
+
+  return connectPromise;
 }
 
 async function seedIfEmpty(db) {
@@ -35,7 +40,7 @@ async function seedIfEmpty(db) {
 
 function getDB() {
   if (!dbInstance) {
-    throw new Error('Database not initialized. Call connectDB() first.');
+    throw new Error('Database not initialized. Ensure connectDB() is called.');
   }
   return dbInstance;
 }
