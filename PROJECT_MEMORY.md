@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-19
+> **Last updated:** 2026-07-19 (post-MongoDB Atlas fix)
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `main`
@@ -163,10 +163,13 @@ All 404s return JSON (never HTML):
 - **CI/CD Workflow:** `.github/workflows/deploy.yml` triggers Render deployment via Deploy Hook secret (`RENDER_DEPLOY_HOOK`) on push to `main`
 
 ### MongoDB Atlas
-- **Cluster:** `Cluster0` (Project: `Project 0`)
+- **Cluster:** `Cluster0` (Project: `Project 0`, Provider: AWS AP_SOUTH_1)
 - **Database:** `police_db`
 - **User:** `pruthuvide_db_user`
-- **URI:** `mongodb://pruthuvide_db_user:<password>@ac-0je3era-shard-00-00.q8herfx.mongodb.net:27017,ac-0je3era-shard-00-01.q8herfx.mongodb.net:27017,ac-0je3era-shard-00-02.q8herfx.mongodb.net:27017/police_db?ssl=true&authSource=admin&replicaSet=atlas-b4evjl-shard-0`
+- **SRV URI (Render env var):** `mongodb+srv://pruthuvide_db_user:<password>@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority`
+- **Network Access:** `0.0.0.0/0` (allow all IPs — required for Render's dynamic IPs)
+
+> **IMPORTANT:** Always use the `mongodb+srv://` SRV URI in the `MONGODB_URI` Render environment variable. The legacy direct-shard URI (`mongodb://...shard-00...ssl=true`) triggers **TLS alert 80** on Render's OpenSSL 3.x containers and will cause all DB routes to fail with `{ "error": "Database error" }`. The code in `src/data/db.js` has a `resolveUri()` guard that automatically falls back to the hardcoded SRV URI if the env var contains a legacy shard string, but the env var should always be the clean SRV URI.
 
 ---
 
@@ -174,16 +177,15 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
+| `41a0d62` | chore: trigger redeploy after Atlas IP access list update | 2026-07-19 |
+| `b133d57` | fix: resolveUri detects legacy shard URIs and falls back to clean SRV URI | 2026-07-19 |
+| `d39740d` | fix: update MongoClient with explicit tls and tlsAllowInvalidCertificates options | 2026-07-19 |
+| `fa6c8ba` | fix: flexible number/string ID matching and null-safe ping formatting | 2026-07-19 |
+| `4bbe0d6` | fix: add SRV fallback for MongoDB Atlas cloud connection | 2026-07-19 |
+| `d88b7e1` | fix: make MONGODB_URI dynamic inside connectDB | 2026-07-19 |
 | `92b1718` | chore: switch deploy branch configuration from prod to main | 2026-07-13 |
 | `7222b9c` | Layer 3 - Secure admin write routes with Basic Auth | 2026-07-13 |
-| `19f2b29` | chore: remove index.js and update PROJECT_MEMORY for layered arch | 2026-07-13 |
 | `9ca92e5` | Refactor: split single-file index.js into layered architecture | 2026-07-13 |
-| `4e26bf3` | docs: update PROJECT_MEMORY.md to document Vehicle CRUD routes | 2026-07-12 |
-| `6d5fbae` | docs: update PROJECT_MEMORY.md to document Basic Auth requirements | 2026-07-12 |
-| `29133ab` | docs: refactor README.md to use professional, emoji-free, and well-structured formatting | 2026-07-11 |
-| `cb0dc55` | docs: update README.md with comprehensive student-friendly project overview and guides | 2026-07-11 |
-| `3912295` | docs: update PROJECT_MEMORY.md to reflect Vercel config removal and new Layer 4 endpoints | 2026-07-11 |
-| `ad5e5e4` | chore: remove unused Vercel configuration files | 2026-07-11 |
 | `d0fc2d3` | Layer 4 - Add POST /vehicles/:vehicleId/pings with X-API-Key auth and GET /vehicles/:vehicleId/pings/:pingId | 2026-07-05 |
 
 **Commit message convention:** `Layer N - <description>` or `S<num>: <description>`
