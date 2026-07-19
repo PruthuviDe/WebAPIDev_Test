@@ -10,7 +10,8 @@ const seedData = require(path.join(__dirname, '../../seed.json'));
 async function connectDB() {
   if (dbInstance) return dbInstance;
 
-  client = new MongoClient(MONGODB_URI);
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/police_db';
+  client = new MongoClient(uri);
   await client.connect();
   dbInstance = client.db();
 
