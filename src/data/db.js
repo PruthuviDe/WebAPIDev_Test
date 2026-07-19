@@ -7,14 +7,19 @@ let connectPromise;
 
 const seedData = require(path.join(__dirname, '../../seed.json'));
 
-const ATLAS_URI = 'mongodb+srv://pruthuvide_db_user:PgQK5xYiz6pORd0s@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority';
+const CLEAN_ATLAS_URI = 'mongodb+srv://pruthuvide_db_user:PgQK5xYiz6pORd0s@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority';
 
 async function connectDB() {
   if (dbInstance) return dbInstance;
   if (connectPromise) return connectPromise;
 
   connectPromise = (async () => {
-    const uri = process.env.MONGODB_URI || ATLAS_URI;
+    let uri = process.env.MONGODB_URI;
+
+    // Force clean SRV URI if missing, pointing to localhost, or using legacy non-SRV shard string
+    if (!uri || uri.includes('shard-00') || uri.includes('ssl=true') || uri.includes('localhost')) {
+      uri = CLEAN_ATLAS_URI;
+    }
 
     client = new MongoClient(uri, {
       serverSelectionTimeoutMS: 10000,
