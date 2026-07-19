@@ -162,6 +162,12 @@ All 404s return JSON (never HTML):
 - **Push command:** `git push origin main`
 - **CI/CD Workflow:** `.github/workflows/deploy.yml` triggers Render deployment via Deploy Hook secret (`RENDER_DEPLOY_HOOK`) on push to `main`
 
+### MongoDB Atlas
+- **Cluster:** `Cluster0` (Project: `Project 0`)
+- **Database:** `police_db`
+- **User:** `pruthuvide_db_user`
+- **URI:** `mongodb://pruthuvide_db_user:<password>@ac-0je3era-shard-00-00.q8herfx.mongodb.net:27017,ac-0je3era-shard-00-01.q8herfx.mongodb.net:27017,ac-0je3era-shard-00-02.q8herfx.mongodb.net:27017/police_db?ssl=true&authSource=admin&replicaSet=atlas-b4evjl-shard-0`
+
 ---
 
 ## 9. Commit History
