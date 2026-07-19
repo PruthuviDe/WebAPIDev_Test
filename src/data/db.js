@@ -16,24 +16,14 @@ async function connectDB() {
   connectPromise = (async () => {
     let uri = process.env.MONGODB_URI || ATLAS_URI;
 
-    try {
-      client = new MongoClient(uri, {
-        tls: true,
-        tlsAllowInvalidCertificates: true,
-        serverSelectionTimeoutMS: 10000
-      });
-      await client.connect();
-      dbInstance = client.db();
-    } catch (err) {
-      console.warn('Initial connect failed, trying fallback ATLAS_URI:', err.message);
-      client = new MongoClient(ATLAS_URI, {
-        tls: true,
-        tlsAllowInvalidCertificates: true,
-        serverSelectionTimeoutMS: 10000
-      });
-      await client.connect();
-      dbInstance = client.db();
+    // Sanitize URI: Replace legacy ssl=true / shard-00 strings with clean SRV URI
+    if (uri.includes('ssl=true') || uri.includes('shard-00') || uri.includes('localhost')) {
+      uri = ATLAS_URI;
     }
+
+    client = new MongoClient(uri);
+    await client.connect();
+    dbInstance = client.db();
 
     await seedIfEmpty(dbInstance);
 
