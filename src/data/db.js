@@ -7,26 +7,26 @@ let connectPromise;
 
 const seedData = require(path.join(__dirname, '../../seed.json'));
 
-const CLEAN_ATLAS_URI = 'mongodb+srv://pruthuvide_db_user:PgQK5xYiz6pORd0s@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority';
+const ATLAS_URI = 'mongodb+srv://pruthuvide_db_user:PgQK5xYiz6pORd0s@cluster0.q8herfx.mongodb.net/police_db?retryWrites=true&w=majority';
 
 async function connectDB() {
   if (dbInstance) return dbInstance;
   if (connectPromise) return connectPromise;
 
   connectPromise = (async () => {
-    let uri = process.env.MONGODB_URI || CLEAN_ATLAS_URI;
+    let uri = process.env.MONGODB_URI || ATLAS_URI;
 
     try {
       client = new MongoClient(uri, {
         tls: true,
-        serverSelectionTimeoutMS: 10000,
-        connectTimeoutMS: 10000
+        tlsAllowInvalidCertificates: true,
+        serverSelectionTimeoutMS: 10000
       });
       await client.connect();
       dbInstance = client.db();
     } catch (err) {
-      console.warn('Initial connect with TLS failed, retrying with fallback options...', err.message);
-      client = new MongoClient(CLEAN_ATLAS_URI, {
+      console.warn('Initial connect failed, trying fallback ATLAS_URI:', err.message);
+      client = new MongoClient(ATLAS_URI, {
         tls: true,
         tlsAllowInvalidCertificates: true,
         serverSelectionTimeoutMS: 10000
