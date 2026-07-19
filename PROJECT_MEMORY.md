@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-13 19:46 (Render Deploy Hook validation)
+> **Last updated:** 2026-07-19
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `main`
@@ -10,12 +10,12 @@
 
 ## 1. Project Overview
 
-A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data from a static `seed.json` file loaded into memory at startup. Built for a coursework submission following WSO2 REST API Design guidelines. All read (GET) routes are secured with HTTP Basic Authentication.
+A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data backed by a persistent MongoDB database (auto-seeded from `seed.json` on initial connection). Built for a coursework submission following WSO2 REST API Design guidelines. All read (GET) routes are secured with HTTP Basic Authentication.
 
 **Stack:**
 - Runtime: Node.js ≥ 18
 - Framework: Express 4.x
-- Data: `seed.json` (in-memory, loaded once at startup via `require()`)
+- Data: MongoDB (via `mongodb` native driver, connected via `MONGODB_URI`)
 - Deployment: Render (Web Service) — auto-deploys on push to `main`
 - Start command: `node server.js`
 - Port: `process.env.PORT || 3000`
@@ -26,27 +26,27 @@ A minimal Express.js REST API that serves Sri Lanka police vehicle tracking data
 
 ```
 WebAPIDev_Test/
-├── server.js                      ← entry point (listen only)
+├── server.js                      ← entry point (connects to MongoDB, listens on port)
 ├── src/
 │   ├── app.js                     ← Express setup, middleware, router mounting
 │   ├── data/
-│   │   └── db.js                  ← loads seed.json once; exports db
+│   │   └── db.js                  ← connects to MongoDB, auto-seeds from seed.json if empty
 │   ├── middleware/
-│   │   └── basicAuth.js           ← Basic Auth guard (GET requests only)
+│   │   └── basicAuth.js           ← Basic Auth guard (GET requests & admin write routes)
 │   ├── helpers/
 │   │   └── formatters.js          ← fmtProvince/District/Station/Vehicle/Ping,
-│   │                                 getLatestPing, nextId, deviceKeys
+│   │                                 getLatestPing, nextId, getDeviceKey
 │   └── routes/
 │       ├── geography.routes.js    ← /provinces, /districts, /stations
 │       ├── vehicle.routes.js      ← /vehicles CRUD + sub-routes
 │       └── ping.routes.js         ← POST + GET /vehicles/:id/pings
 ├── package.json                   ← { "start": "node server.js" }
-├── seed.json                      ← static data (689 KB, loaded once)
+├── seed.json                      ← static seed data for initial MongoDB auto-seeding
 ├── render.yaml                    ← Render deployment config
 └── .gitignore
 ```
 
-**Do NOT add a database (MongoDB, Postgres, SQLite, etc.) — seed.json only.**
+**Database persistence enabled with MongoDB native driver.**
 **Do NOT add authentication or middleware unless explicitly asked.**
 **Branch `feature/layered-arch` holds the refactored code. Merge to `main` when approved.**
 

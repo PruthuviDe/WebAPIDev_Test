@@ -1,44 +1,71 @@
 const express = require('express');
-const db = require('../data/db');
+const { getDB } = require('../data/db');
 const { fmtProvince, fmtDistrict, fmtStation } = require('../helpers/formatters');
 
 // ── Provinces ─────────────────────────────────────────────────────────────────
 const provinces = express.Router();
 
-provinces.get('/', (req, res) => {
-  res.json(db.provinces.map(fmtProvince));
+provinces.get('/', async (req, res) => {
+  try {
+    const list = await getDB().collection('provinces').find({}).toArray();
+    res.json(list.map(fmtProvince));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-provinces.get('/:provinceId', (req, res) => {
-  const record = db.provinces.find(p => p.id === Number(req.params.provinceId));
-  if (!record) return res.status(404).json({ error: 'Province not found' });
-  res.json(fmtProvince(record));
+provinces.get('/:provinceId', async (req, res) => {
+  try {
+    const record = await getDB().collection('provinces').findOne({ id: Number(req.params.provinceId) });
+    if (!record) return res.status(404).json({ error: 'Province not found' });
+    res.json(fmtProvince(record));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // ── Districts ─────────────────────────────────────────────────────────────────
 const districts = express.Router();
 
-districts.get('/', (req, res) => {
-  res.json(db.districts.map(fmtDistrict));
+districts.get('/', async (req, res) => {
+  try {
+    const list = await getDB().collection('districts').find({}).toArray();
+    res.json(list.map(fmtDistrict));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-districts.get('/:districtId', (req, res) => {
-  const record = db.districts.find(d => d.id === Number(req.params.districtId));
-  if (!record) return res.status(404).json({ error: 'District not found' });
-  res.json(fmtDistrict(record));
+districts.get('/:districtId', async (req, res) => {
+  try {
+    const record = await getDB().collection('districts').findOne({ id: Number(req.params.districtId) });
+    if (!record) return res.status(404).json({ error: 'District not found' });
+    res.json(fmtDistrict(record));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 // ── Stations ──────────────────────────────────────────────────────────────────
 const stations = express.Router();
 
-stations.get('/', (req, res) => {
-  res.json(db.stations.map(fmtStation));
+stations.get('/', async (req, res) => {
+  try {
+    const list = await getDB().collection('stations').find({}).toArray();
+    res.json(list.map(fmtStation));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
-stations.get('/:stationId', (req, res) => {
-  const record = db.stations.find(s => s.id === Number(req.params.stationId));
-  if (!record) return res.status(404).json({ error: 'Station not found' });
-  res.json(fmtStation(record));
+stations.get('/:stationId', async (req, res) => {
+  try {
+    const record = await getDB().collection('stations').findOne({ id: Number(req.params.stationId) });
+    if (!record) return res.status(404).json({ error: 'Station not found' });
+    res.json(fmtStation(record));
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
 });
 
 module.exports = { provinces, districts, stations };

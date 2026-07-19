@@ -8,7 +8,7 @@
 
 2. **Update PROJECT_MEMORY.md after every task** that changes routes, shapes, commits, or deployment state. Always update the `Last updated` date, Commit History, and Route Table sections.
 
-3. **No database.** Data comes exclusively from `seed.json` loaded at startup via `require()`. Never add mongoose, knex, pg, Sequelize, or any ORM.
+3. **Database:** Data is stored in MongoDB (using `mongodb` native driver), auto-seeded from `seed.json` if collections are empty. `MONGODB_URI` env var is used for connection.
 
 4. **No authentication or middleware** unless explicitly instructed.
 
