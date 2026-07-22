@@ -1,3 +1,5 @@
+![Sri Lanka Police Vehicle Tracking System Banner](assets/banner.png)
+
 # Sri Lanka Police Vehicle Tracking API
 
 This is a RESTful API built with Node.js, Express, and MongoDB, designed for tracking police vehicle positions in Sri Lanka. The project is developed as part of the coursework requirements for the NB6007CEM Web API Development module (Coventry University / NIBM).
