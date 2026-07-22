@@ -2,7 +2,11 @@
 
 This is a RESTful API built with Node.js, Express, and MongoDB, designed for tracking police vehicle positions in Sri Lanka. The project is developed as part of the coursework requirements for the NB6007CEM Web API Development module (Coventry University / NIBM).
 
-*   **Student Index:** COBSCCOMP251P-016
+*   **Student Registered Name:** W.P.N.S.M.D.SILVA
+*   **NIBM Index Number:** COBSCCOMP25.1P-016
+*   **Coventry Index Number:** 16602658
+*   **Module:** NB6007CEM — Web API Development
+*   **Programme:** BSc (Hons) Computer Science with Software Engineering (Coventry University / NIBM)
 *   **Target Platform:** Render
 *   **Production URL:** https://webapidev-test-8luf.onrender.com
 *   **Postman Workspace Link:** [Sri Lanka Police API Workspace](https://www.postman.com/warped-firefly-225285/workspace/my-workspace)

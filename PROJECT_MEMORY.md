@@ -2,7 +2,7 @@
 
 > **Last updated:** 2026-07-22 (Sessions 9 & 10 Advanced Query Surface)
 > **Module:** NB6007CEM · Session: S2
-> **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
+> **Author:** W.P.N.S.M.D.SILVA (Pruthuvi De Silva) · Coventry ID: 16602658 · NIBM ID: COBSCCOMP25.1P-016
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `main`
 > **Live URL:** https://webapidev-test-8luf.onrender.com
 
