@@ -1,6 +1,6 @@
 # WebAPIDev_Test — Project Memory
 
-> **Last updated:** 2026-07-19 (post-MongoDB Atlas fix)
+> **Last updated:** 2026-07-22 (Sessions 9 & 10 Advanced Query Surface)
 > **Module:** NB6007CEM · Session: S2
 > **Author:** Pruthuvi De Silva · pruthuvidesilva1@gmail.com
 > **Repo:** https://github.com/PruthuviDe/WebAPIDev_Test · branch: `main`
@@ -111,21 +111,21 @@ const getLatestPing = (vehicleId) =>
 | GET | `/` | `{ status, session, auth }` | Health check · `auth: "JWT + RBAC"` |
 | POST | `/auth/login` | `{ token_type, access_token, expires_in, user }` | Public · Exchange credentials (`username`, `password`) for JWT Bearer token |
 | GET | `/auth/me` | `{ user }` | Returns authenticated user profile |
-| GET | `/provinces` | `[{ province_id, name }]` | Requires JWT Bearer Token |
-| GET | `/provinces/:provinceId` | `{ province_id, name }` | 404 if not found |
-| GET | `/districts` | `[{ district_id, name, province_id }]` | Requires JWT Bearer Token |
-| GET | `/districts/:districtId` | `{ district_id, name, province_id }` | 404 if not found |
-| GET | `/stations` | `[{ station_id, name, district_id }]` | Requires JWT Bearer Token |
-| GET | `/stations/:stationId` | `{ station_id, name, district_id }` | 404 if not found |
-| GET | `/vehicles` | `[{ vehicle_id, reg_number, device_id, station_id }]` | Requires JWT Bearer Token |
+| GET | `/provinces` | `{ count, next, previous, data: [{ province_id, name }] }` | Envelope · Requires JWT Bearer Token |
+| GET | `/provinces/:provinceId` | `{ province_id, name }` | Bare object · 404 if not found |
+| GET | `/districts` | `{ count, next, previous, data: [{ district_id, name, province_id }] }` | Envelope · Requires JWT Bearer Token |
+| GET | `/districts/:districtId` | `{ district_id, name, province_id }` | Bare object · 404 if not found |
+| GET | `/stations` | `{ count, next, previous, data: [{ station_id, name, district_id }] }` | Envelope · Requires JWT Bearer Token |
+| GET | `/stations/:stationId` | `{ station_id, name, district_id }` | Bare object · 404 if not found |
+| GET | `/vehicles` | `{ count, next, previous, data: [{ vehicle_id, reg_number, ... }] }` | Envelope · Supports `?province=`, `?district=`, `?station_id=`, `?offset=`, `?limit=` |
 | POST | `/vehicles` | `{ vehicle_id, reg_number, device_id, station_id }` | Restricted to `ADMIN` role. Body: `{ vehicle_id, plateNumber, vehicleType, stationId }` |
 | GET | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id, last_ping }` | **Composite** — `last_ping` is nested `fmtPing()` object or `null` |
 | PUT | `/vehicles/:vehicleId` | `{ vehicle_id, reg_number, device_id, station_id }` | Restricted to `ADMIN` role. Replace entire vehicle resource |
 | DELETE | `/vehicles/:vehicleId` | `{ message }` | Restricted to `ADMIN` role. Delete vehicle resource |
-| GET | `/vehicles/:vehicleId/pings` | `[{ ping_id, vehicle_id, timestamp, lat, lng, speed }]` | All pings for vehicle, scoped |
+| GET | `/vehicles/:vehicleId/pings` | `{ count, next, previous, data: [{ ping_id, vehicle_id, ... }] }` | Envelope · Supports `?from=`, `?to=`, `?sort=timestamp,asc|desc` (default newest first), `?offset=`, `?limit=` |
 | POST | `/vehicles/:vehicleId/pings` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Ingest new GPS ping. Requires valid `X-API-Key` |
-| GET | `/vehicles/:vehicleId/pings/:pingId` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Get specific ping |
-| GET | `/vehicles/:vehicleId/last-position` | `{ vehicle_id, timestamp, lat, lng, speed }` | **No** `ping_id`, **no** vehicle metadata |
+| GET | `/vehicles/:vehicleId/pings/:pingId` | `{ ping_id, vehicle_id, timestamp, lat, lng, speed }` | Bare object · Get specific ping |
+| GET | `/vehicles/:vehicleId/last-position` | `{ vehicle_id, timestamp, lat, lng, speed }` | Processing function · Supports Conditional GET (`If-None-Match` -> `304 Not Modified`) |
 
 > ⚠️ There is NO bare `GET /pings` route — pings are always scoped to a vehicle.
 
@@ -179,7 +179,8 @@ All 404s return JSON (never HTML):
 
 | Hash | Message | Date |
 |------|---------|------|
-| `a4c9f10` | feat: implement JWT authentication and Role-Based Access Control (RBAC) | 2026-07-19 |
+| `3d71e21` | feat: implement Sessions 9 & 10 Query Surface (Envelopes, Filtering, Pagination, Sorting, ETag / 304) | 2026-07-22 |
+| `6f17501` | feat: implement JWT authentication and Role-Based Access Control (RBAC) | 2026-07-19 |
 | `41a0d62` | chore: trigger redeploy after Atlas IP access list update | 2026-07-19 |
 | `b133d57` | fix: resolveUri detects legacy shard URIs and falls back to clean SRV URI | 2026-07-19 |
 | `d39740d` | fix: update MongoClient with explicit tls and tlsAllowInvalidCertificates options | 2026-07-19 |

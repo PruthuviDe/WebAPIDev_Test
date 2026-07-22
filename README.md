@@ -84,9 +84,12 @@ The API strictly adheres to WSO2 REST API design specifications:
 *   **Uniform Resource Identifiers (URIs):** All path segments use lowercase letters and hyphens (kebab-case). For example, `/last-position` is used instead of camelCase or snake_case.
 *   **Resource Orientation:** URIs represent nouns (collections or individual resources) rather than actions or verbs. Operations are defined by standard HTTP methods (`GET`, `POST`, `PUT`, `DELETE`).
 *   **Relationship Scoping:** Dependent collections are correctly scoped under parent resources (e.g., `/vehicles/:vehicleId/pings`). No bare `/pings` route exists.
-*   **Flat Payloads:** Envelope wrappers (e.g., nesting arrays inside a `data` key) are avoided. Collections return flat JSON arrays; atomic members return flat JSON objects.
+*   **Collection Envelopes:** All collection resources (`/provinces`, `/districts`, `/stations`, `/vehicles`, `/vehicles/:vehicleId/pings`) are wrapped in a standard collection envelope: `{ "count": N, "next": "...", "previous": "...", "data": [...] }`. Member routes (`/vehicles/:id`, `/last-position`) remain bare JSON objects.
+*   **Server-Side Filtering & Pagination:** Supports filtering (`?district=`, `?province=`, `?station_id=`, `?from=`, `?to=`), pagination (`?offset=`, `?limit=`), and sorting (`?sort=timestamp,asc|desc`). Link URLs in `next`/`previous` preserve active query parameters.
+*   **Pipeline Sequence:** Enforces the strict execution pipeline: **FILTER → SORT → PAGINATE**. The `count` property represents the total matching document count in the database (The Count Gate).
+*   **Conditional GET (304 Not Modified):** `GET /vehicles/:vehicleId/last-position` evaluates `If-None-Match` against the current position's `ETag` fingerprint. Unchanged requests return `304 Not Modified` with an empty response body.
 *   **Naming Conventions:** Response body fields are represented consistently in `snake_case` (e.g., `vehicle_id`, `reg_number`, `station_id`).
-*   **Consistent Response Headers:** Successful resource creation (POST) returns the standard `Location`, `ETag`, and `Last-Modified` headers.
+*   **Consistent Response Headers:** Successful resource creation (POST) returns standard `Location`, `ETag`, and `Last-Modified` headers.
 
 ---
 
